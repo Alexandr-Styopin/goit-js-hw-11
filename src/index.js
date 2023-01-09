@@ -27,7 +27,8 @@ const refs = {
 
 refs.searchForm.addEventListener('submit', onSubmitForm);
 refs.loadMore.addEventListener('click', onClickloadMore);
-refs.loadMore.classList.add('is-load-more');
+
+refs.loadMore.classList.add('is-hidden');
 
 function responseProcessing() {
   serviceAPI
@@ -37,16 +38,32 @@ function responseProcessing() {
       const numberImages = data.totalHits;
       const numberEl = images.length;
 
-      let mathVlue = numberImages - serviceAPI.pageValue * numberEl;
-      console.log(mathVlue);
+      if (images.length === 0) {
+        refs.gallery.innerHTML = '';
+        serviceAPI.pageValue = 1;
 
-      if (mathVlue <= 0) {
+        refs.loadMore.classList.add('is-hidden');
+
         Notiflix.Notify.failure(
-          "We're sorry, but you've reached the end of search results."
+          'Sorry, there are no images matching your search query. Please try again.'
         );
+
+        return;
       }
 
       serviceAPI.pageValue += 1;
+
+      let mathValue = numberImages - serviceAPI.pageValue * numberEl;
+
+      if (mathValue <= 0) {
+        mathValue = 0;
+
+        refs.loadMore.classList.add('is-hidden');
+
+        return Notiflix.Notify.info(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
 
       renderCared(images);
     })
@@ -97,18 +114,7 @@ function onSubmitForm(e) {
 }
 
 function renderCared(images) {
-  if (images.length === 0) {
-    refs.gallery.innerHTML = '';
-    serviceAPI.pageValue = 1;
-
-    refs.loadMore.classList.add('is-load-more');
-
-    Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-  }
-
-  refs.loadMore.classList.remove('is-load-more');
+  refs.loadMore.classList.remove('is-hidden');
 
   const imagesEl = images.map(image => {
     return cardTemplate(image);
