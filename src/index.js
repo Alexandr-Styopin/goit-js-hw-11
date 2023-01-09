@@ -14,6 +14,7 @@ class ServiceAPI {
     const { data } = await axios.get(
       `${URL}?${KEY_API}&q=${this.searchData}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.pageValue}&per_page=40`
     );
+
     return data;
   }
 }
@@ -30,46 +31,87 @@ refs.loadMore.addEventListener('click', onClickloadMore);
 
 refs.loadMore.classList.add('is-hidden');
 
-function responseProcessing() {
-  serviceAPI
-    .getPiaxabay()
-    .then(data => {
-      const images = data.hits;
-      const numberImages = data.totalHits;
-      const numberEl = images.length;
+//  function responseProcessing() {
+//   serviceAPI
+//     .getPiaxabay()
+//     .then(data => {
+//       const images = data.hits;
+//       const numberImages = data.totalHits;
+//       const numberEl = images.length;
 
-      if (images.length === 0) {
-        refs.gallery.innerHTML = '';
-        serviceAPI.pageValue = 1;
+//       if (images.length === 0) {
+//         refs.gallery.innerHTML = '';
+//         serviceAPI.pageValue = 1;
 
-        refs.loadMore.classList.add('is-hidden');
+//         refs.loadMore.classList.add('is-hidden');
 
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
+//         Notiflix.Notify.failure(
+//           'Sorry, there are no images matching your search query. Please try again.'
+//         );
 
-        return;
-      }
+//         return;
+//       }
 
-      serviceAPI.pageValue += 1;
+//       serviceAPI.pageValue += 1;
 
-      let mathValue = numberImages - serviceAPI.pageValue * numberEl;
+//       let mathValue = numberImages - serviceAPI.pageValue * numberEl;
 
-      if (mathValue <= 0) {
-        mathValue = 0;
+//       if (mathValue <= 0) {
+//         mathValue = 0;
 
-        refs.loadMore.classList.add('is-hidden');
+//         refs.loadMore.classList.add('is-hidden');
 
-        return Notiflix.Notify.info(
-          "We're sorry, but you've reached the end of search results."
-        );
-      }
+//         return Notiflix.Notify.info(
+//           "We're sorry, but you've reached the end of search results."
+//         );
+//       }
 
-      renderCared(images);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+//       renderCared(images);
+//     })
+//     .catch(err => {
+//       console.log(err);
+//     });
+// }
+
+async function responseProcessing() {
+  try {
+    const data = await serviceAPI.getPiaxabay();
+
+    const images = data.hits;
+    const numberImages = data.totalHits;
+    const numberEl = images.length;
+
+    serviceAPI.pageValue += 1;
+
+    if (images.length === 0) {
+      refs.gallery.innerHTML = '';
+      serviceAPI.pageValue = 1;
+
+      refs.loadMore.classList.add('is-hidden');
+
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+
+      return;
+    }
+
+    let mathValue = numberImages - serviceAPI.pageValue * numberEl;
+
+    if (mathValue <= 0) {
+      mathValue = 0;
+      // serviceAPI.pageValue = 1;
+      refs.loadMore.classList.add('is-hidden');
+
+      return Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
+
+    return renderCared(images);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 const cardTemplate = image =>
@@ -101,6 +143,8 @@ const cardTemplate = image =>
 
 function onSubmitForm(e) {
   e.preventDefault();
+
+  serviceAPI.pageValue = 1;
 
   const formEl = e.currentTarget.elements;
   const searchData = formEl.searchQuery.value.trim();
