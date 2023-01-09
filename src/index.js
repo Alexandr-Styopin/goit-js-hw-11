@@ -72,6 +72,37 @@ async function responseProcessing() {
   }
 }
 
+function onSubmitForm(e) {
+  e.preventDefault();
+  refs.gallery.innerHTML = '';
+  serviceAPI.pageValue = 1;
+
+  const formEl = e.currentTarget.elements;
+  const searchData = formEl.searchQuery.value.trim();
+
+  if (searchData === '') {
+    return;
+  }
+
+  serviceAPI.searchData = searchData;
+  responseProcessing();
+}
+
+function onClickloadMore(e) {
+  e.preventDefault();
+  responseProcessing();
+}
+
+function renderCared(images) {
+  refs.loadMore.classList.remove('is-hidden');
+
+  const imagesEl = images.map(image => {
+    return cardTemplate(image);
+  });
+
+  refs.gallery.insertAdjacentHTML('beforeend', imagesEl.join(''));
+}
+
 const cardTemplate = image =>
   `<div class="photo-card">
   <img src="${image.webformatURL}" 
@@ -98,34 +129,3 @@ const cardTemplate = image =>
     </p>
   </div>
 </div>`;
-
-function onSubmitForm(e) {
-  e.preventDefault();
-
-  serviceAPI.pageValue = 1;
-
-  const formEl = e.currentTarget.elements;
-  const searchData = formEl.searchQuery.value.trim();
-
-  if (searchData === '') {
-    return;
-  }
-
-  serviceAPI.searchData = searchData;
-  responseProcessing();
-}
-
-function renderCared(images) {
-  refs.loadMore.classList.remove('is-hidden');
-
-  const imagesEl = images.map(image => {
-    return cardTemplate(image);
-  });
-
-  refs.gallery.insertAdjacentHTML('beforeend', imagesEl.join(''));
-}
-
-function onClickloadMore(e) {
-  e.preventDefault();
-  responseProcessing();
-}
