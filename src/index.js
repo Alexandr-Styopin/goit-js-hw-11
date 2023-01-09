@@ -11,14 +11,10 @@ class ServiceAPI {
     const KEY_API = 'key=22160943-514fc90dc5a1a6996be2229bd';
     const URL = 'https://pixabay.com/api/';
 
-    const {
-      data: { hits },
-    } = await axios.get(
+    const { data } = await axios.get(
       `${URL}?${KEY_API}&q=${this.searchData}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.pageValue}&per_page=40`
     );
-    console.log(this.pageValue);
-
-    return hits;
+    return data;
   }
 }
 const serviceAPI = new ServiceAPI();
@@ -36,8 +32,22 @@ refs.loadMore.classList.add('is-load-more');
 function responseProcessing() {
   serviceAPI
     .getPiaxabay()
-    .then(images => {
+    .then(data => {
+      const images = data.hits;
+      const numberImages = data.totalHits;
+      const numberEl = images.length;
+
+      let mathVlue = numberImages - serviceAPI.pageValue * numberEl;
+      console.log(mathVlue);
+
+      if (mathVlue <= 0) {
+        Notiflix.Notify.failure(
+          "We're sorry, but you've reached the end of search results."
+        );
+      }
+
       serviceAPI.pageValue += 1;
+
       renderCared(images);
     })
     .catch(err => {
@@ -74,9 +84,9 @@ const cardTemplate = image =>
 
 function onSubmitForm(e) {
   e.preventDefault();
-  refs.gallery.innerHTML = '';
+
   const formEl = e.currentTarget.elements;
-  const searchData = formEl.searchQuery.value;
+  const searchData = formEl.searchQuery.value.trim();
 
   if (searchData === '') {
     return;
@@ -87,15 +97,19 @@ function onSubmitForm(e) {
 }
 
 function renderCared(images) {
-  refs.loadMore.classList.remove('is-load-more');
-
   if (images.length === 0) {
     refs.gallery.innerHTML = '';
+    serviceAPI.pageValue = 1;
+
     refs.loadMore.classList.add('is-load-more');
+
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
+
+  refs.loadMore.classList.remove('is-load-more');
+
   const imagesEl = images.map(image => {
     return cardTemplate(image);
   });
