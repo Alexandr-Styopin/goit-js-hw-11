@@ -31,48 +31,6 @@ refs.loadMore.addEventListener('click', onClickloadMore);
 
 refs.loadMore.classList.add('is-hidden');
 
-//  function responseProcessing() {
-//   serviceAPI
-//     .getPiaxabay()
-//     .then(data => {
-//       const images = data.hits;
-//       const numberImages = data.totalHits;
-//       const numberEl = images.length;
-
-//       if (images.length === 0) {
-//         refs.gallery.innerHTML = '';
-//         serviceAPI.pageValue = 1;
-
-//         refs.loadMore.classList.add('is-hidden');
-
-//         Notiflix.Notify.failure(
-//           'Sorry, there are no images matching your search query. Please try again.'
-//         );
-
-//         return;
-//       }
-
-//       serviceAPI.pageValue += 1;
-
-//       let mathValue = numberImages - serviceAPI.pageValue * numberEl;
-
-//       if (mathValue <= 0) {
-//         mathValue = 0;
-
-//         refs.loadMore.classList.add('is-hidden');
-
-//         return Notiflix.Notify.info(
-//           "We're sorry, but you've reached the end of search results."
-//         );
-//       }
-
-//       renderCared(images);
-//     })
-//     .catch(err => {
-//       console.log(err);
-//     });
-// }
-
 async function responseProcessing() {
   try {
     const data = await serviceAPI.getPiaxabay();
@@ -100,7 +58,7 @@ async function responseProcessing() {
 
     if (mathValue <= 0) {
       mathValue = 0;
-      // serviceAPI.pageValue = 1;
+
       refs.loadMore.classList.add('is-hidden');
 
       return Notiflix.Notify.info(
